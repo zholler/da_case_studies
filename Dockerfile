@@ -1,9 +1,9 @@
-# base image
+# base image from modified nbgallery jupyter-alpine: ubuntu based jupyter docker
 FROM jbiro93/da_cases_py
 
 # copy project folders into container
-COPY ../da_case_studies/ ./da_case_studies/
-COPY ../da_data_repo/ ./da_data_repo/
+COPY ./da_case_studies/ ./da_case_studies/
+COPY ./da_data_repo/ ./da_data_repo/
 
 # install requirements
 RUN pip3 install cython tornado asyncio notebook
