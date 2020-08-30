@@ -1,55 +1,56 @@
-######################################################################
-# Chapter 04
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
 #
-# wms-management-survey
-# v1.3. 2019-10-04 tidyverse edits
-# v1.4. 2020-02-06 dataset name edited, boxplot graphics edited
-# v1.5. 2020-03-13 edit axes, labels
-# v1.6. 2020-03-30 edit graphs, SIC corrected
-# v1.7. 2020-03-30 edit graphs, colors
-# v1.8. 2020-04-07 more edit graphs, colors
-# v1.9 2020-04-22 names ok
-# v1.10 2020-04-27 label edits
-# v2.0 2020-04-28 adds plots for ch03
+###############################################################################################x
 
-# using WMS data 2004-2015
-#
+# CHAPTER 04 
+# CH04A Management quality and firm size: describing patterns of association
+# WMS  dataset
+# version 0.9 2020-08-28
+
+
 ######################################################################
 
 
 ######################################################################
 
-# Clear memory
+# START NEW SESSION --- it is best to start a new session !
+# CLEAR MEMORY
 rm(list=ls())
 
-# Import libraries
-require(tidyverse)
-require(plyr)
-library(gridExtra)
-library(cowplot)
-library(viridis)
+# packages
+library(tidyverse)
 library(haven)
 library(Hmisc)
 library(binsreg)
 library(xtable)
-library(dplyr)
 
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
-# Location folders
-data_in <- paste0(dir,"da_data_repo/wms-management-survey/clean/")
-data_out <- paste0(dir,"da_case_studies/ch04-management-firm-size/")
-output <- paste0(dir,"da_case_studies/ch04-management-firm-size/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
+# set data dir, load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
 
-#call function
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R"))
+# data used
+source("set-data-directory.R") #data_dir must be first defined #
+data_in <- paste(data_dir,"wms-management-survey","clean/", sep = "/")
+
+use_case_dir <- "ch04-management-firm-size/"
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
+
+
 
 ########################################################################
-
 # Import data
 df <- read_csv(paste0(data_in,"wms_da_textbook.csv"))
 
@@ -72,40 +73,38 @@ df %>%
   summarise_all(funs(min, max, mean, median, sd, n()))
 
 # Histogram
-g1<-ggplot(data = df, aes (x = management, y = (..count..)/sum(..count..))) +
-  geom_histogram_da(binwidth = 0.25, type="frequency") +
+g1<-ggplot(data = df, aes (x = management)) +
+  geom_histogram_da(binwidth = 0.25, type="percent", boundary = 0) +
   labs(x = "Management score", y = "Percent") +
   #scale_x_continuous(breaks = seq(1, 5, by = 1)) +
   scale_x_continuous(expand = c(0.01,0.01),limits = c(1,5))+
   scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.25), breaks = seq(0, 0.25, by = 0.05), labels = scales::percent_format(accuracy = 1)) +
   theme_bg() 
 g1
-#save_fig("wms_Mex_management_hist_R",output , "small") 
 save_fig("ch04-figure-1-wms-mex-mgmt-hist",output , "small") 
 
 
-g2<-ggplot(data = df, aes (x = emp_firm, y = (..count..)/sum(..count..))) +
-  geom_histogram_da(binwidth = 200, type="frequency") +
+g2a<-ggplot(data = df, aes (x = emp_firm )) +
+  geom_histogram_da(binwidth = 200, type="percent") +
   labs(x = "Firm size (employment)", y = "Percent") +
   scale_x_continuous(expand = c(0.01,0.01),limits=c(0, 5000), breaks = seq(0, 5000, by = 1000)) +
-  scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.5), breaks = seq(0, 1, by = 0.1), labels = scales::percent_format(accuracy = 1)) +
+  scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.3), breaks = seq(0, 0.3, by = 0.05), labels = scales::percent_format(accuracy = 1)) +
   theme_bg() 
-g2
-#save_fig("wms_Mex_emp_hist_R",output , "small") 
+g2a
 save_fig("ch04-figure-2a-wms-mex-emp-hist",output , "small") 
 
 # Generate variable
 df$lnemp = log(df$emp_firm)
+Hmisc::describe(df$lnemp)
 
 # Histogram
-g3<-ggplot(data = df, aes (x = lnemp, y = (..count..)/sum(..count..))) +
-  geom_histogram_da(binwidth = 0.3, type="frequency") +
+g2b<-ggplot(data = df, aes (x = lnemp)) +
+  geom_histogram_da(binwidth = 0.25, type="percent", boundary=0) +
   labs(x = "Firm size (ln(employment))", y = "Percent") +
   scale_x_continuous(expand = c(0.01,0.01),limits = c(4,9)) +
   scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.2), breaks = seq(0, 0.2, by = 0.04), labels = scales::percent_format(accuracy = 1)) +
   theme_bg() 
-g3
-#save_fig("wms_Mex_lnemp_hist_R",output , "small")
+g2b
 save_fig("ch04-figure-2b-wms-mex-lnemp-hist",output , "small")
 ########################################################################
 
@@ -130,7 +129,7 @@ df1 <- df %>%
   mutate(Percent= round(Count / sum(Count),digits = 5)) %>% ungroup()
 
 # Stacked bar
-g4<-ggplot(data=df1, aes(x=emp3bins, y=Percent, fill = factor(lean1, levels = rev(unique(lean1))))) +
+g3a<-ggplot(data=df1, aes(x=emp3bins, y=Percent, fill = factor(lean1, levels = rev(unique(lean1))))) +
   geom_bar(stat = "identity", position = "fill",width = 0.6,  color = "white",  size = 0.5, alpha = 0.8) +
   scale_y_continuous(expand=c(0,0), limits=c(0, 1), breaks = seq(0, 1, by = 0.2), labels = scales::percent_format()) +
   scale_x_discrete(labels=c("1" = "Small", "2" = "Medium", "3" = "Large")) +
@@ -139,8 +138,7 @@ g4<-ggplot(data=df1, aes(x=emp3bins, y=Percent, fill = factor(lean1, levels = re
   labs(x = "Firm size (employment), 3 bins", y = "Percent") +
   theme_bg() +
   theme(legend.position = "right")
-g4
-#save_fig("wms_Mex_lean1_emp3bins_R_oldcol",output , "small") FIXME
+g3a
 save_fig("ch04-figure-3a-wms-mex-lean1-emp3bins",output , "small")
 
 # Create pivot
@@ -152,7 +150,7 @@ df1 <- df %>%
                 # use %>% ungroup() when do multiple times group_by
 
 
-g5<-ggplot(data=df1, aes(x=emp3bins, y=Percent, fill = factor(perf2, levels = rev(unique(perf2))))) +
+g3b<-ggplot(data=df1, aes(x=emp3bins, y=Percent, fill = factor(perf2, levels = rev(unique(perf2))))) +
   geom_bar(stat = "identity", position = "fill",width = 0.6,  color = "white",  size = 0.5, alpha = 0.8) +
   scale_y_continuous(expand=c(0,0), limits=c(0, 1), breaks = seq(0, 1, by = 0.2), labels = scales::percent_format()) +
   scale_x_discrete(labels=c("1" = "Small", "2" = "Medium", "3" = "Large")) +
@@ -161,8 +159,7 @@ g5<-ggplot(data=df1, aes(x=emp3bins, y=Percent, fill = factor(perf2, levels = re
   labs(x = "Firm size (employment), 3 bins", y = "Percent") +
   theme_bg() +
   theme(legend.position = "right")
-g5
-#save_fig("wms_Mex_perf2_emp3bins_R",output , "small")
+g3b
 save_fig("ch04-figure-3b-wms-mex-perf2-emp3bins",output , "small")
 
 ##############################################################################
@@ -193,15 +190,14 @@ df1<-df %>% group_by(emp3bins) %>%
 
 
 # Bin scatters
-g6<-ggplot(data = df1, aes(x = emp3bins, y = management_emp3bins)) +
+g4a<-ggplot(data = df1, aes(x = emp3bins, y = management_emp3bins)) +
   geom_point(size = 2, color = color[3], fill= color[1], shape = 21, alpha = 0.8, na.rm=T) +
   #geom_text(aes(label = round(management_emp3bins, 1)), hjust = 0.5, vjust = -1, color = "black", size = 3) +
   scale_y_continuous(expand = c(0.01,0.01),limits = c(2.4, 3.4), breaks = seq(2.4, 3.4, by=0.2)) +
   scale_x_continuous(expand = c(0.01,0.01),limits = c(0, 3000), breaks = seq(0,3000, by=500)) +
   labs(x = "Firm size (employment), 3 bins", y = "Management score") +
   theme_bg() 
-g6
-#save_fig("wms_Mex_management_emp3bins_R",output , "small")
+g4a
 save_fig("ch04-figure-4a-wms-mex-mgmt-emp3bins",output , "small")
 
 # Option 2: create 10 bins as defined by equal cutoffs
@@ -235,18 +231,17 @@ df1 <- df %>% group_by(emp10bins) %>%
               dplyr::summarize(management_emp10bins=mean(management))
 
 # Bin scatters
-g7<-ggplot(data = df1, aes(x = emp10bins, y = management_emp10bins)) +
+g4b<-ggplot(data = df1, aes(x = emp10bins, y = management_emp10bins)) +
   geom_point(size = 2, color = color[3], fill= color[1], shape = 21, alpha = 0.8, na.rm=T) +
   #geom_text(aes(label = round(management_emp10bins, 1)), hjust = 0.5, vjust = -1, color = "black", size = 3) +
   scale_y_continuous(expand = c(0.01,0.01),limits = c(2.5, 3.5), breaks = seq(2.5, 3.5, by=0.25)) +
   scale_x_continuous(expand = c(0.01,0.01),limits = c(0, 3500), breaks = seq(0,3500, by=500)) +
   labs(x = "Firm size (employment), 10 bins", y = "Management score") +
   theme_bg() 
-g7
-#save_fig("wms_Mex_management_emp10bins_R",output , "small")
+g4b
 save_fig("ch04-figure-4b-wms-mex-mgmt-emp10bins",output , "small")
 
-# This is a simpler solution, similar looking graph:
+# This is a simpler solution, similar looking graph (not in book):
 binsreg(df$management, df$emp_firm, nbins = 10)
 
 
@@ -255,26 +250,24 @@ binsreg(df$management, df$emp_firm, nbins = 10)
 
 # Scatterplot avg score by employment
 
-g8<-ggplot(data = df, aes(x = emp_firm, y = management)) +
+g5a<-ggplot(data = df, aes(x = emp_firm, y = management)) +
   geom_point(color = color[1], size = 1.5,  shape = 16, alpha = 0.8, show.legend=FALSE, na.rm = TRUE) + 
   scale_x_continuous(expand = c(0.01,0.01),limits=c(0, 5000), breaks=seq(0, 5000, by=1000)) + 
   scale_y_continuous(expand = c(0.01,0.01),limits = c(1, 5), breaks = seq(1, 5,1)) +
   labs(x = "Firm size (employment)",y = "Management score")+
   theme_bg() 
-g8
-#save_fig("wms_Mex_management_emp_scatter_R",output , "small")
+g5a
 save_fig("ch04-figure-5a-wms-mex-mgmt-emp-scatter",output , "small")
 
 df$lnemp = log(df$emp_firm)
 
-g9<-ggplot(data = df, aes(x = lnemp, y = management)) +
+g5b<-ggplot(data = df, aes(x = lnemp, y = management)) +
   geom_point(color = color[1], size = 1.5,  shape = 16, alpha = 0.8, show.legend=FALSE, na.rm = TRUE) + 
   scale_x_continuous(expand = c(0.01,0.01),limits=c(4, 9), breaks=seq(4, 9, by=1)) + 
   scale_y_continuous(expand = c(0.01,0.01),limits = c(1, 5), breaks = seq(1, 5,1)) +
   labs(x = "Firm size (ln(employment))",y = "Management score")+
   theme_bg() 
-g9
-#save_fig("wms_Mex_management_lnemp_scatter_R",output , "small")
+g5b
 save_fig("ch04-figure-5b-wms-mex-mgmt-lnemp-scatter",output , "small")
 
 # Box plots by emp bins
@@ -282,7 +275,7 @@ df$emp3bins <- as.factor(df$emp3bins)
 levels(df$emp3bins) <- c('Small','Medium', 'Large')
 
 # Boxplot
-g10<-ggplot(data = df, aes(x = emp3bins, y = management)) +
+g6a<-ggplot(data = df, aes(x = emp3bins, y = management)) +
   stat_boxplot(aes(group = emp3bins), geom = "errorbar", width = 0.5, color = c(color[2], color[1], color[3]), size = 0.5, na.rm=T)+
   geom_boxplot(aes(group = emp3bins),  color = c(color[2], color[1], color[3]), fill  = c(color[2], color[1], color[3]), size = 0.5, width = 0.5, alpha = 0.3, na.rm=T) +
   labs(x = "Firm size (employment), 3 bins",y = "Management score")+
@@ -290,12 +283,11 @@ g10<-ggplot(data = df, aes(x = emp3bins, y = management)) +
   #  geom_jitter(aes(color = emp3bins), position=position_jitter(0.1), size = 0.5, show.legend=F,  na.rm=TRUE) +
   #scale_color_viridis(discrete = TRUE, option = "D", begin = 0, end=0.7)+
   theme_bg() 
-g10
-#save_fig("wms_Mex_boxplot_management_emp3bins_R",output , "small")
+g6a
 save_fig("ch04-figure-6a-wms-mex-boxplot-mgmt-emp3bins",output , "small")
 
 # Violin plot
-g11<-ggplot(data = df, aes(x = emp3bins, y = management, color=emp3bins, fill=emp3bins)) +
+g6b<-ggplot(data = df, aes(x = emp3bins, y = management, color=emp3bins, fill=emp3bins)) +
   geom_violin(aes(group = emp3bins),   size=0.3,  alpha=0.3, trim = F, show.legend=F, na.rm =TRUE) +
   geom_boxplot(aes(group = emp3bins),  color = c(color[2], color[1], color[3]), fill  = c(color[2], color[1], color[3]), size = 0.5, width = 0.2, alpha = 0.3, na.rm=T) +
 #  geom_jitter(aes(color = emp3bins), position=position_jitter(0.1), size = 0.5, show.legend=F,  na.rm=TRUE, alpha = 0.8) +  labs(x = "Number of Employees, 3 bins",y = "Average management quality score")+
@@ -306,8 +298,7 @@ g11<-ggplot(data = df, aes(x = emp3bins, y = management, color=emp3bins, fill=em
   scale_fill_manual(name="", 
                     values=c(color[2],color[1], color[3])) +
   theme_bg() 
-g11
-#save_fig("wms_Mex_violin_management_emp3bins_R", output, "small")
+g6b
 save_fig("ch04-figure-6b-wms-mex-violin-mgmt-emp3bins", output, "small")
 
 
@@ -320,13 +311,14 @@ cor(df$management, df$emp_firm, use = "complete.obs")
 table(df$sic)
 
 # by industry
-df$industry_broad[df$sic<22] <- 'food_drinks_tobacco'
-df$industry_broad[df$sic>=22 & df$sic<24 | df$sic==310  | df$sic==390 ] <- 'textile_apparel_leather_etc'
+df$industry_broad[df$sic<=21] <- 'food_drinks_tobacco'
+df$industry_broad[df$sic>=22 & df$sic<=23 | df$sic==31  ] <- 'textile_apparel_leather_etc'
 df$industry_broad[df$sic>=24& df$sic<=27] <- 'wood_furniture_paper'
 df$industry_broad[df$sic>=28 & df$sic<=30] <- 'chemicals_etc'
 df$industry_broad[df$sic>=32 & df$sic<35] <- 'materials_metals'
 df$industry_broad[df$sic>=35 & df$sic<37] <- 'electronics'
-df$industry_broad[df$sic>=37 & df$sic<38] <- 'auto'
+df$industry_broad[df$sic==37 ] <- 'auto'
+df$industry_broad[df$sic>=38]             <- 'other'
 
 table(df$industry_broad)
 
@@ -356,8 +348,6 @@ df %>%
                    Median = median(emp_firm),
                    n())
 
-# todo create Table 4.1. using this
-# N/A -->other
 
 cor<-df %>%
   group_by(industry_broad) %>%
@@ -374,13 +364,13 @@ table41 <-df %>%
 table41$cor<-cor$COR
 
 
-table41<-table41 %>% replace_na(list(industry_broad = "other"))
+#table41<-table41 %>% replace_na(list(industry_broad = "other"))
 table41$industry_broad<-table41$industry_broad %>% dplyr::recode(auto='Auto',
                                         chemicals_etc='Chemicals',
-                                        electronics='Electronics',
+                                        electronics='Machinery, equipment, electronics',
                                         food_drinks_tobacco='Food, drinks, tobacco',
                                         materials_metals='Materials, metals',
-                                        textile_apparel_leather_etc='Textile, apparel',
+                                        textile_apparel_leather_etc='Textile, apparel, leather',
                                         wood_furniture_paper='Wood, furniture, paper',
                                         other = 'Other'
                                         )
@@ -458,7 +448,6 @@ ggplot(data = df2, aes(x = emp3bins, y = management)) +
               axis.text.y = element_blank(),
               panel.grid = element_blank(), panel.border = element_blank())+
 background_grid(major="none", minor="none")
-#ggsave(paste0(output, "boxlot_R.png"), width=14, height=8, units = "cm", dpi = 1200)
 save_fig("ch03-figure-8a-boxplot", output, "small")
 
 
@@ -481,7 +470,6 @@ ggplot(data = df2, aes(x = emp3bins, y = management)) +
               axis.text.y = element_blank(),
               panel.grid = element_blank(), panel.border = element_blank())+
 background_grid(major="none", minor="none")
-#ggsave(paste0(output, "violin_R.png"), width=12, height=8, units = "cm", dpi = 1200)
 save_fig("ch03-figure-8b-violinplot", output, "small")
 
 

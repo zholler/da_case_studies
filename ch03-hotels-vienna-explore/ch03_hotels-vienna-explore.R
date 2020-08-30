@@ -1,52 +1,51 @@
-###############################################
-# Chapter 03
- 
-# DATA ANALYSIS TEXTBOOK
-# CH03
-# Describe hotels-vienna
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
 # 
-# v1.0.2019-10-07
-# v1.1 2020-03-09 graph axes remastered
-# v1.2 2020-03-13 labels edited
-# v1.3 2020-03-21 labels edited
-# v1.4 2020-04-06 graphs
-# v1.4. 2020-04-06 minor graphs
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
+#
+###############################################################################################x
+
+# CHAPTER 03
+# CH03B Comparing hotel prices in Europe: Vienna vs. London 	
+# hotels-europe dataset
+# version 0.9 2020-08-28
 
 
-
-# WHAT THIS CODES DOES:
-# Focus on histograms
-
-###############################################
-
-
-
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
 # CLEAR MEMORY
 rm(list=ls())
 
 # Import libraries
-
-library(ggplot2)
 library(tidyverse)
 library(scales)
-
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+library(xtable)
 
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/hotels-vienna/clean/")
-data_out <-  paste0(dir,"da_case_studies/ch03-hotels-vienna-explore/")
-output <- paste0(dir,"da_case_studies/ch03-hotels-vienna-explore/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
 
-#call function
-source(paste0(func, "theme_bg.R"))
-# Created a helper function with some useful stuff
-source(paste0(func, "da_helper_functions.R"))
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
 
+data_in <- paste(data_dir,"hotels-vienna","clean/", sep = "/")
+
+use_case_dir <- "ch03-hotels-vienna-explore/"
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 
 
@@ -113,7 +112,7 @@ histprice_Vienna1 <- ggplot(data =  vienna_cut, aes (x = price)) +
   labs(x = "Price (US dollars)", y = "Frequency") +
   expand_limits(x = 0.01, y = 0.01) +
   scale_x_continuous(expand = c(0.01,0.01),limits = c(0,500), breaks = seq(0, 500, by = 50)) +
-  scale_y_continuous(expand = c(0.01,0.01)) +
+  scale_y_continuous(expand = c(0.00,0.00)) +
   theme_bg() 
 histprice_Vienna1
 #save_fig("histprice_Vienna1_R", output, "small")
@@ -126,7 +125,7 @@ histprice_Vienna2 <- ggplot(data =  vienna_cut, aes (x = price)) +
   expand_limits(x = 0.01, y = 0.01) +
   coord_cartesian(clip = "off") +
   scale_x_continuous(expand = c(0.01,0.01),limits = c(0,500), breaks = seq(0, 500, by = 50)) +
-  scale_y_continuous(expand = c(0.01,0.01),limits = c(0,45), breaks = seq(0, 45, by =5)) +
+  scale_y_continuous(expand = c(0.00,0.00),limits = c(0,40), breaks = seq(0, 40, by =5)) +
     theme_bg() 
 histprice_Vienna2
 #save_fig("histprice_Vienna2_R", output, "small")
@@ -141,7 +140,7 @@ save_fig("ch03-figure-2b-hist-price", output, "small")
 histprice_Vienna3 <- ggplot(data =  vienna_cut, aes (x = price)) +
   geom_histogram_da(type="frequency", binwidth = 40)+
   labs(x = "Price (US dollars)", y = "Frequency") +
-  scale_x_continuous(expand = c(0.0,0.0), limits = c(0,510), breaks = seq(0, 500, by = 80)) +
+  scale_x_continuous(expand = c(0.01,0.01), limits = c(0,510), breaks = seq(0, 500, by = 80)) +
   scale_y_continuous(expand = c(0.0,0.0), limits = c(0,120), breaks = seq(0, 120, by = 20)) +
     theme_bg() 
 histprice_Vienna3
@@ -152,7 +151,7 @@ save_fig("ch03-figure-3a-hist-price", output, "small")
 histprice_Vienna4 <- ggplot(data =  vienna_cut, aes (x = price)) +
   geom_histogram_da(type="frequency", binwidth = 80)+
   labs(x = "Price (US dollars)", y = "Frequency") +
-  scale_x_continuous(expand = c(0.0,0.0), limits = c(0,510), breaks = seq(0, 500, by = 80)) +
+  scale_x_continuous(expand = c(0.01,0.01), limits = c(0,510), breaks = seq(0, 500, by = 80)) +
   scale_y_continuous(expand = c(0.0,0.0), limits = c(0,160), breaks = seq(0, 150, by = 50)) +
   theme_bg() 
 histprice_Vienna4
@@ -174,8 +173,9 @@ vienna_cut <- vienna %>% filter(accommodation_type=="Hotel") %>%
 histdist_Vienna <- ggplot(data =  vienna_cut, aes (x = distance)) +
   geom_histogram_da(type="frequency", binwidth = 0.5)+
   labs(x = "Distance to city center (miles)", y = "Frequency") +
-  scale_x_continuous(expand = c(0.0,0.0), limits = c(0,14), breaks = seq(0, 14, by = 2)) +
-  scale_y_continuous(expand = c(0.0,0.0), limits = c(0,61), breaks = seq(0, 60, by = 10)) +
+  expand_limits(x = 0.01, y = 0.01) +
+  scale_x_continuous(expand = c(0.01,0.01), limits = c(0,14), breaks = seq(0, 14, by = 2)) +
+  scale_y_continuous(expand = c(0.00,0.00), limits = c(0,61), breaks = seq(0, 60, by = 10)) +
   theme_bg() 
 histdist_Vienna
 #save_fig("histdist_Vienna_R", output, "small")
@@ -186,8 +186,9 @@ save_fig("ch03-figure-4-hist-dist", output, "small")
 histdist_Vienna_annot <- ggplot(data =  vienna_cut, aes (x = distance)) +
   geom_histogram_da(type="frequency", binwidth = 0.5)+
   labs(x = "Distance to city center (miles)", y = "Frequency") +
-  scale_x_continuous(expand = c(0.0,0.0), limits = c(0,14), breaks = seq(0, 14, by = 2)) +
-  scale_y_continuous(expand = c(0.0,0.0), limits = c(0,61), breaks = seq(0, 60, by = 10)) +
+  expand_limits(x = 0.01, y = 0.01) +
+  scale_x_continuous(expand = c(0.01,0.01), limits = c(0,14), breaks = seq(0, 14, by = 2)) +
+  scale_y_continuous(expand = c(0.00,0.00), limits = c(0,61), breaks = seq(0, 60, by = 10)) +
   geom_segment(aes(x = 8.2, y = 0, xend = 8.2, yend = 60), color = color[2], size=1) +
   #geom_segment(aes(x = 10, y = 40, xend = 8.4, yend = 40), arrow = arrow(length = unit(0.2, "cm")))+
   annotate("text", x = 11, y = 29, label = "Too far out", size=2)+
@@ -195,7 +196,7 @@ histdist_Vienna_annot <- ggplot(data =  vienna_cut, aes (x = distance)) +
   theme_bg() 
 histdist_Vienna_annot
 #save_fig("histdist_Vienna_annot_R", output, "small")
-save_fig("ch03-figure-5-hist-dist-annot-large", output, "small")
+save_fig("ch03-figure-5-hist-dist-annot-large", output, "large")
 
 
 # look at actual city

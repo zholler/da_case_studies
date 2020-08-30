@@ -1,44 +1,53 @@
-############################################################
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
 #
-# DATA ANALYSIS TEXTBOOK
-# TESTING
-# ILLUSTRATION STUDY
-# Billion prices project
-#
-############################################################  
+###############################################################################################x
 
-# v 2.1 2020-03-16  graph edits, + xtable
-# v 2.2 2020-03-21  graph axis edits
-# v 2.3 2020-04-08 save_fig
-# v 2.4 2020-04-24 names ok
+# CHAPTER 06
+# CH06A 
+# billion-prices dataset
+# version 0.9 2020-08-28
 
-# WHAT THIS CODES DOES:
 
-# Filter the dataset
-# Checking price distribution
-# Hypothesis testing on online-offline price difference
-# Clear memory
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
 rm(list=ls())
 
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
-
-#location folders
-data_in <- paste0(dir,"/da_data_repo/billion-prices/clean/")
-data_out <- paste0(dir,"/da_case_studies/ch06-online-offline-price-test/")
-output <- paste0(dir,"/da_case_studies/ch06-online-offline-price-test/output/")
-func <- paste0(dir, "/da_case_studies/ch00-tech-prep/")
-
-
-#call function
-source(paste0(func, "theme_bg.R"))
-
-# PACKAGES
-library(dplyr)
+# Import libraries
 library(tidyverse)
-library(broom)
 library(xtable)
+
+
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+data_in <- paste(data_dir,"billion-prices","clean/", sep = "/")
+
+use_case_dir <- "ch06-online-offline-price-test/"
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
+
+
+#-----------------------------------------------------------------------------------------
 
 # load data
 pd <- read.csv(paste0(data_in,"online_offline_ALL_clean.csv"))
@@ -63,7 +72,7 @@ descr <- pd %>% summarise(mean = mean(diff,na.rm=T), sd = sd(diff,na.rm=T), min=
 descr
 
 hist1<- ggplot(data=pd, aes(diff))+
-  geom_histogram(binwidth = 5, boundary=0,
+  geom_histogram(binwidth = 5, boundary=0, closed="left",
                  fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
   labs(x = "Online - offline price difference (US dollars)", y = "Frequency") +
   theme_bg()+
@@ -82,13 +91,13 @@ pd1<-subset(pd,abs(pd$diff)<4.999999)
 Hmisc::describe(pd1$diff)
 
 hist2<- ggplot(data=pd, aes(diff))+
-  geom_histogram(binwidth = 0.5, center=0.5,
+  geom_histogram(binwidth = 0.5, boundary=-0, closed="left",
                  color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
   labs(x = "Online - offline price difference (US dollars)", y = "Frequency") +
   theme_bg()+
   expand_limits(x = 0.01, y = 0.01) +
   scale_x_continuous(limits = c(-5, 5), breaks = seq(-5, 5, by = 1)) +
-  scale_y_continuous(expand = c(0.00,0.00))
+  scale_y_continuous(expand = c(0.00,0.00), limits=c(0,5000), breaks = seq(0, 5000, by = 1000))
 hist2
 #save_fig("R_F06_2", output, "small")
 save_fig("ch06-figure-1b-pricediff2", output, "small")
