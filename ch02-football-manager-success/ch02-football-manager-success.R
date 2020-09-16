@@ -1,49 +1,53 @@
-################################################################################################
-# Prepared for the textbook:
-# Data Analysis for Business, Economics, and Policy
-# by Gabor BEKES and  Gabor KEZDI 
-# Cambridge University Press 2021
-# 
-# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
-#
-###############################################################################################x
+###############################################
+# Chapter 02
+# Data Analysis Textbook
 
-# CHAPTER 02
-# CH02B Identifying successful football managers
+# Teams and Managers infootball 
+# (ENGLISH PREMIER LEAGUE SEASONS)
+# v1.0 2019-09-16
+# v1.1 2020-01-28 minor edits, all files csv_read
+# v1.2 2020-03-09 graph x axis renamed + axes remastered
+# v1.3 2020-04-09 FIXME (graph)
+# v1.4 2020-04-22 name ok
+# v1.4 2020-04-26 graph edited
 
-# football dataset
-# version 0.9 2020-08-28
 
-###########
+###############################################
+
+# WHAT THIS CODES DOES:
+  ## opens data tables, and creates a single graph
+
+###############################################
 
 # CLEAR MEMORY
 rm(list=ls())
 
+library(dplyr)
 library(tidyverse)
 library(haven)
 library(lspline)
+library(lsr) # cohensD
 library(grid)
-library(cowplot)
+library(RColorBrewer)
+library(readr)
+library(rstudioapi)
 #----------------------------------------------------------------------------------------------------
 
 
-# set working directory
-# option A: open material as project
-# option B: set working directory for da_case_studies
-#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+# Set your directory here
+current_path = rstudioapi::getActiveDocumentContext()$path 
+dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
 
-# set data dir, load theme and functions
-source("ch00-tech-prep/theme_bg.R")
-source("ch00-tech-prep/da_helper_functions.R")
+#location folders
+data_in <-   paste0(dir,"da_data_repo/football/clean/")
+data_out <-  paste0(dir,"da_case_studies/ch02-football-manager-success/")
+output <-    paste0(dir,"da_case_studies/ch02-football-manager-success/output/")
+func <-      paste0(dir,"da_case_studies/ch00-tech-prep/")
 
-# data used
-source("set-data-directory.R") #data_dir must be first defined #
-data_in <- paste(data_dir,"football","clean/", sep = "/")
-
-use_case_dir <- "ch02-football-manager-success/"
-data_out <- use_case_dir
-output <- paste0(use_case_dir,"output/")
-create_output_if_doesnt_exist(output)
+#call function
+source(paste0(func, "theme_bg.R"))
+# Created a helper function with some useful stuff
+source(paste0(func, "da_helper_functions.R"))
 
 
 # look at basic data
@@ -81,7 +85,7 @@ View(epl_games)
 
 football_managers <- read_csv(paste0(data_in, "football_managers.csv"))
 View(football_managers)
-Hmisc:: describe(football_managers_merged$manager_id)
+
 
 
 #--------------------------------------------------------------------------------------------------------
@@ -96,29 +100,29 @@ football_managers_merged <-  football_managers_merged %>%
 
 games <- football_managers_merged %>%
   group_by(team, manager_id, manager_name) %>%  
-  summarise(manager_games=n())
+  dplyr::summarise(manager_games=n())
 
 points <- football_managers_merged %>%
   group_by(team, manager_id, manager_name) %>%
-  summarise(manager_points=sum(points))
+  dplyr::summarise(manager_points=sum(points))
 
-avg_points <-  merge(games, points, by = c('manager_id', 'team', 'manager_name')) %>%
+win_ratio <-  merge(games, points, by = c('manager_id', 'team', 'manager_name')) %>%
   group_by(team, manager_id, manager_name) %>%
-  mutate(manager_avg_points = (manager_points/manager_games)) %>%
-  arrange(manager_avg_points)
+  mutate(manager_win_ratio = (manager_points/manager_games)) %>%
+  arrange(manager_win_ratio)
 
-avg_points <- avg_points %>%
-  arrange(-manager_avg_points)
-avg_points
+win_ratio <- win_ratio %>%
+  arrange(-manager_win_ratio)
+win_ratio
 
-top_managers <-  avg_points %>%
-  filter(manager_avg_points >= 2)
+top_managers <-  win_ratio %>%
+  filter(manager_win_ratio >= 2)
 top_managers
 
 # denote caretakers
 top_managers <- top_managers %>%
-  mutate(manager_avg_points0 = ifelse(manager_games < 18, manager_avg_points, NA),
-         manager_avg_points1 = ifelse(manager_games > 18, manager_avg_points, NA))
+  mutate(manager_win_ratio0 = ifelse(manager_games < 18, manager_win_ratio, NA),
+         manager_win_ratio1 = ifelse(manager_games > 18, manager_win_ratio, NA))
 
 # --------------------------------------------------------------------------------------------
 # visualize
@@ -129,7 +133,7 @@ top_managers <-  top_managers %>%
                          manager_games > 18 ~ "0" )) 
 
 top_managers_graph <- top_managers %>%
-  ggplot(., aes( x= reorder(manager_name, manager_avg_points), y = manager_avg_points, fill = fill, alpha = fill)) +
+  ggplot(., aes( x= reorder(manager_name, manager_win_ratio), y = manager_win_ratio, fill = fill, alpha = fill)) +
   geom_col(show.legend=F) +
   ylab("Average points per game") +
   xlab("Manager name") +

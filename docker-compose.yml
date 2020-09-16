@@ -1,0 +1,14 @@
+version: '3.2'
+services:
+  da-jup:
+    build: 
+      context: ../
+      dockerfile: ./da_case_studies/Dockerfile
+    ports:
+    - "443:443"
+    volumes:
+    - type: bind
+      source: ./da_case_studies
+      target: /root/da_case_studies2/
+      volume:
+        nocopy: false

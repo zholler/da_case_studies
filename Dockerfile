@@ -1,8 +1,9 @@
 # base image from modified nbgallery jupyter-alpine: ubuntu based jupyter docker
-FROM jbiro93/da_cases_py
+FROM jbiro93/da_cases_py:latest
 
 # copy project folders into container
 COPY ./da_case_studies/ ./da_case_studies/
+RUN mkdir ./da_case_studies2
 COPY ./da_data_repo/ ./da_data_repo/
 
 # install requirements
