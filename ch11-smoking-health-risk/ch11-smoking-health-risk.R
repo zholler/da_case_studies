@@ -46,9 +46,15 @@ source("set-data-directory.R")             # data_dir must be first defined
 # alternative: give full path here, 
 #            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
 
+
 # load theme and functions
 source("ch00-tech-prep/theme_bg.R")
 source("ch00-tech-prep/da_helper_functions.R")
+setwd("/Users/mate_toth/dev/projects/ceu_python/da_case_studies/")
+data_dir <- "/Users/mate_toth/dev/projects/ceu_python/da_data_repo"
+
+current_path = rstudioapi::getActiveDocumentContext()$path 
+dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
 
 data_in <- paste(data_dir,"share-health","clean/", sep = "/")
 
