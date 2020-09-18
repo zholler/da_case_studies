@@ -281,6 +281,7 @@ save_fig("ch11-figure-3-pred-histogram-lpm", output, "small")
 # list top 1% and bottom 1%
 share <- share[!is.na(share$pred_lpm), ]
 
+##TODO:check this
 share <- share %>% 
   mutate(q100_pred_lpm = ntile(pred_lpm, 100))
 
