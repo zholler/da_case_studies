@@ -188,7 +188,7 @@ rm(reg, reg2_rob, i, coeff_intercept, coeff_dist_0_2, coeff_dist_2_7, d)
 data <- read_csv(paste0(data_out,"hotels_work.csv"))
 
 data <- data %>% filter(stars>=3 & stars <=4) %>%
-  filter(city=="Hotel") %>%
+  filter(accommodation_type=="Hotel") %>%
   filter(date=="2017-NOV-weekday")
 
 data %>% group_by(city) %>% summarize(mean=mean(distance), min=min(distance),
@@ -210,7 +210,7 @@ coeff_dist_2_7 <- c()
 i=0
 
 #for (c in unique(data[data$city=="Amsterdam" | data$city=="Barcelona", ]$city)) {
-for (c in unique(data %>% filter(city %in% c("Amsterdam","Barcelona")))) {
+for (c in  c("Amsterdam","Barcelona")) {
   i=i+1
   reg <- ols(lnprice ~ lspline(distance, 2)  ,filter(data,city==c), x=TRUE)
   #print(ols(lnprice ~ lspline(distance, 2)  ,data[data$city==c, ], x=TRUE))
@@ -246,10 +246,10 @@ data %>% group_by(stars) %>% summarize(mean=mean(lnprice), min=min(lnprice),
                                        max=max(lnprice), median=median(lnprice),n=n()) 
 
 # regressions
-reg4_rob<-ols(lnprice ~ lspline(distance, 2)  ,filter(data,accomodation=="Hotel"), x=TRUE)
+reg4_rob<-ols(lnprice ~ lspline(distance, 2)  ,filter(data,accommodation_type=="Hotel"), x=TRUE)
 robcov(reg4_rob)
 
-reg5_rob<-ols(lnprice ~ lspline(distance, 2)  ,filter(data,accomodation=="Apartment"), x=TRUE)
+reg5_rob<-ols(lnprice ~ lspline(distance, 2)  ,filter(data,accommodation_type=="Apartment"), x=TRUE)
 robcov(reg5_rob)
 
 # TODO
