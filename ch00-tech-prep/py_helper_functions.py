@@ -3,6 +3,7 @@
 ####################################################
 import numpy as np
 import copy
+import pandas as pd
 
 ####################################################
 # Define global vars
@@ -49,3 +50,15 @@ def lspline(series, knots):
     design_matrix = np.column_stack((design_matrix, vector))
     # print(design_matrix)
     return design_matrix
+
+def lag(x, n=1):
+    if n == 0:
+        return x
+    if isinstance(x,pd.Series):
+        return x.shift(n)
+
+    x = x.copy()
+    x[n:] = x[0:-n]
+    x[:n] = np.nan
+    return x
+
