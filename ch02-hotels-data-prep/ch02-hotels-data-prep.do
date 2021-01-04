@@ -1,35 +1,60 @@
-**********************************************
+********************************************************************
+* Prepared for Gabor's Data Analysis
+*
+* Data Analysis for Business, Economics, and Policy
+* by Gabor Bekes and  Gabor Kezdi
+* Cambridge University Press 2021
+*
+* gabors-data-analysis.com 
+*
+* License: Free to share, modify and use for educational purposes. 
+* 	Not to be used for commercial purposes.
+*
 * Chapter 02
-*
-* hotels-vienna
-*
-*
-* PART A: basic look, some descriptives 
-* uses clean data
-
-* PART B: repeat of the cleaning code
-* uses raw data
-
-* v1.3
-**********************************************
-
-* ssc install listtab
-
-* set the path
-cd "C:\Users\GB\Dropbox (MTA KRTK)\bekes_kezdi_textbook"
+* CH02A Finding a good deal among hotels: data preparation
+* using the hotels-vienna dataset
+* version 0.9 2020-09-06
+********************************************************************
 
 
-*********************************************************
-* PART A: basic look, some descriptives 
-*********************************************************
-*location folders
-global data_in   "da_data_repo/hotels-vienna/clean"
-global data_out  "da_case_studies/ch02-hotels-data-prep"
-global output    "da_case_studies/ch02-hotels-data-prep/output"
+* SETTING UP DIRECTORIES
 
- 
+* STEP 1: set working directory for da_case_studies.
+* for example:
+* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+cd "C:\Users\kezdi\GitHub\da_case_studies"
+
+
+* STEP 2: * Directory for data
+* Option 1: run directory-setting do file
+do set-data-directory.do 
+							/* this is a one-line do file that should sit in 
+							the working directory you have just set up
+							this do file has a global definition of your working directory
+							more details: gabors-data-analysis.com/howto-stata/   */
+
+* Option 2: set directory directly here
+* for example:
+* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+
+
+global data_in  "$data_dir/hotels-vienna"
+global work  	"ch02-hotels-data-prep"
+
+cap mkdir 		"$work/output"
+global output 	"$work/output"
+
+
+* we'll use both clean and raw files in this case study
+* separate data_in directpories for these two
+* same for options 1 and 2 (once you have set $data_in)
+global data_in_clean "$data_in/clean"
+global data_in_raw "$data_in/raw"
+
+
+*********************************************************************
 * load in clean and tidy data and create workfile
-use "$data_in/hotels-vienna.dta", clear
+use "$data_in_clean/hotels-vienna.dta", clear
 keep hotel_id price accommodation_type distance stars rating rating_count
 
 * look at accomodation types
@@ -38,7 +63,7 @@ tab accom
 
 
 **********************************************
-* Table 2.1
+* Table 2.2
 **********************************************
 
 sort hotel_id
@@ -46,7 +71,7 @@ lis hotel_id price accommodation_type distance stars rating rating_count if _n==
 
 
 listtab hotel_id price accommodation_type distance stars rating rating_count if _n==2 ///
- using "$output/ch02_hotel_list.tex", replace ///
+ using "$output/ch02-table2-hotel-list-Stata.tex", replace ///
  rstyle(tabular) ///
  head("\begin{tabular}{lrrrrrr}" ///
  `"Hotel ID & Price & Accomodation &Distance & stars & rating & rating count \\"') ///
@@ -58,11 +83,11 @@ listtab hotel_id price accommodation_type distance stars rating rating_count if 
 **********************************************
 
 keep if accommodation_type=="Hotel"
+count
 lis hotel_id price distance if _n<=3
 
-
 listtab hotel_id price distance if _n<=3 ///
- using "$output/ch02_hotel_tidy.tex", replace ///
+ using "$output/ch02-table3-hotel-simpletidy-Stata.tex", replace ///
  rstyle(tabular) ///
  head("\begin{tabular}{lrr}" ///
  `"Hotel ID & Price  & Distance  \\"') ///
@@ -71,20 +96,17 @@ listtab hotel_id price distance if _n<=3 ///
 
 
 *********************************************************
-* PART B: repeat of the cleaning code
+* PART B: repeat part of the cleaning code
+* using the raw csv data file
 * includes some additional output
 *********************************************************
-
-*location folders
-global data_in   "da_data_repo/hotels-vienna/raw"
-global data_out   "da_data_repo/hotels-vienna/clean"
 
 *** IMPORT AND PREPARE DATA
 
 * variables downoaded as string, often in form that is not helpful
 * need to transform then to numbers that we can use
 
-import delimited using "$data_in/hotelbookingdata-vienna.csv", clear
+import delimited using "$data_in_raw/hotelbookingdata-vienna.csv", clear
 
 
 * generate numerical variable of rating variable from string variable
@@ -153,7 +175,7 @@ lis hotel_id accommodation_type price  distance stars rating rating_count ///
 
  
 listtab hotel_id accommodation_type price  distance stars rating rating_count if hotel_id==22050 | hotel_id==22185 ///
- using "$output/ch02_hotel_duplicates.tex", replace ///
+ using "$output/ch02-table10-hotel-duplicates-Stata.tex", replace ///
  rstyle(tabular) ///
  head("\begin{tabular}{lrrrrrr}" ///
  `"Hotel ID & Price & Accomodation &Distance & stars & rating & rating count \\"') ///

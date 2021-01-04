@@ -1,31 +1,50 @@
-*********************************************************************
+********************************************************************
+* Prepared for Gabor's Data Analysis
 *
-* DATA ANALYSIS TEXTBOOK
-* CH02
-* Teams and Managers infootball (ENGLISH PREMIER LEAGUE SEASONS)
+* Data Analysis for Business, Economics, and Policy
+* by Gabor Bekes and  Gabor Kezdi
+* Cambridge University Press 2021
 *
-* 
+* gabors-data-analysis.com 
+*
+* License: Free to share, modify and use for educational purposes. 
+* 	Not to be used for commercial purposes.
+*
+* Chapter 02
+* CH02B Identifying successful football managers
+* using the football dataset
+* version 0.9 2020-09-06
 ********************************************************************
 
-* WHAT THIS CODES DOES:
-* opens data tables, and creates a single graph
 
-********************************************************************
-* SET YOUR DIRECTORY HERE
+* SETTING UP DIRECTORIES
+
+* STEP 1: set working directory for da_case_studies.
+* for example:
+* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+
+* STEP 2: * Directory for data
+* Option 1: run directory-setting do file
+do set-data-directory.do 
+							/* this is a one-line do file that should sit in 
+							the working directory you have just set up
+							this do file has a global definition of your working directory
+							more details: gabors-data-analysis.com/howto-stata/   */
+
+* Option 2: set directory directly here
+* for example:
+* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+
+global data_in  "$data_dir/football/clean"
+global work  	"ch02-football-manager-success"
+
+cap mkdir 		"$work/output"
+global output 	"$work/output"
+
+
 *********************************************************************
-*cd "" /*set your dir*/
-cd "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook"
- * YOU WILL NEED TWO SUBDIRECTORIES
- * textbook_work --- all the codes
- * cases_studies_public --- for the data
-
-*location folders
-global data_in   	"da_data_repo/football/clean"
-global data_out  	"da_case_studies/ch02-football-manager-success"
-global output 		"da_case_studies/ch02-football-manager-success/output"
-
-* look at basic data
-use "$data_in/epl-games",clear
+* look at entire clean data table on games
+use "$data_in/epl_games",clear
 sort team_home
 sort season  team_home
 keep if season == 2016
@@ -39,11 +58,11 @@ keep if season == 2016
 sort date 
 browse
 
-* now look at the managers
+* look at data table on managers
 use "$data_in/football_managers.dta", clear
 browse
 
-* finally the merged file 
+* look at the clean merged file 
 use "$data_in/football_managers_workfile.dta", clear
 sort season team
 browse
@@ -60,20 +79,17 @@ gsort -manager_win_ratio
 
 list if manager_win_ratio>=2
 
-* graph top managers
 
-* TODO 
-* it should be manager (team, # games), "Pep Guardiola (Man City, 114)" 
-* R: colors should be color1 and color3 of our viridis, instead of vertical lines, usual grid
- 
 * denote caretakers
 separate manager_win_ratio, by(manager_games<18)
 
+colorpalette viridis, n(4) select(2) nograph
 graph hbar (mean) manager_win_ratio0 manager_win_ratio1 if manager_win_ratio>=2, ///
  nofill over(manager_name, sort(manager_win_ratio) descending) ///
  scheme(virdis) ///
  legend(off) yscale(r(1.6(0.2)3)) exclude0  ylabel(1.6(0.2)3, grid)  ///
-  yline(1.6(0.2)3, lpattern(solid) lcolor(gray%70)) ///
-graphregion(fcolor(white) ifcolor(none))   plotregion(fcolor(white) ifcolor(white))
-graph export "$output/03_top_managers.png", replace
+  yline(1.6(0.2)3) ///
+ graphregion(fcolor(white) ifcolor(none)) ///
+ plotregion(fcolor(white) ifcolor(white))
+graph export "$output/ch02-figure1-top-managers-Stata.png", replace
 

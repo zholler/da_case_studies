@@ -20,6 +20,7 @@
 # CLEAR MEMORY
 rm(list=ls())
 
+
 # Import libraries
 library(tidyverse)
 library(xtable)
@@ -33,7 +34,6 @@ library(stargazer)
 library(psych)
 library(estimatr)
 library(huxtable)
-library(dplyr)
 
 
 # set working directory
@@ -312,6 +312,11 @@ rm(lpm3)
 # lpm versus logit and probit
 # with all right-hand-side variables
 
+#prep
+library(pscl)
+library(modelsummary)
+
+
 # lpm (repeating the previous regression)
 lpm <-lm(stayshealthy ~ smoking + ever_smoked + female + age + lspline(eduyears, c(8,18)) + 
               income10 + lspline(bmi, c(35)) + exerc + as.factor(country), data=share)
@@ -321,7 +326,7 @@ summary(lpm, vcov=sandwich)
 logit <- glm(stayshealthy ~ smoking + ever_smoked + female + age + lspline(eduyears, c(8,18)) + 
                income10 + lspline(bmi, c(35)) + exerc + as.factor(country), data=share, family='binomial')
 summary(logit)
-
+glance(logit)
 #TODO
 # consider change to margins package
 
@@ -334,7 +339,7 @@ summary(share$pred_logit)
 # logit marginal differences
 logit_marg <- logitmfx(formula = stayshealthy ~ smoking + ever_smoked + female + age + lspline(eduyears, c(8,18)) + 
                           income10 + lspline(bmi, c(35)) + exerc + as.factor(country), data=share, atmean=FALSE)
-print(logit_marg)
+print(logit)
 
 # Or calculate manually
 share$eduyears0_8 <- ifelse(share$eduyears <=8, share$eduyears ,8)
@@ -363,6 +368,30 @@ summary(share$pred_probit)
 probit_marg <- probitmfx(formula = stayshealthy ~ smoking + ever_smoked + female + age + eduyears0_8 + eduyears8_18 + eduyears18 + 
                        income10 + bmi16_35 + bmi35 + exerc + as.factor(country), data=share, atmean=FALSE)
 print(probit_marg)
+
+
+cm <- c('(Intercept)' = 'Constant')
+msummary(list(lpm, logit, logit_marg, probit, probit_marg),
+         fmt="%.3f",
+         gof_omit = 'DF|Deviance|Log.Lik.|F|R2 Adj.|AIC|BIC|R2|PseudoR2',
+         stars=c('*' = .05, '**' = .01),
+         coef_rename = cm,
+         coef_omit = 'as.factor(country)*'
+         #output = paste(output,"ch09_reg2-R.tex",sep="")
+)
+
+# adding pseudo R2 (not work for mfx)
+glance_custom.glm <- function(x) data.frame(`PseudoR2` = pR2(x)["McFadden"])
+cm <- c('(Intercept)' = 'Constant')
+msummary(list(lpm, logit, probit),
+         fmt="%.3f",
+         gof_omit = 'DF|Deviance|Log.Lik.|F|R2 Adj.|AIC|BIC',
+         stars=c('*' = .05, '**' = .01),
+         coef_rename = cm,
+         coef_omit = 'as.factor(country)*'
+         #output = paste(output,"ch09_reg2-R.tex",sep="")
+)
+
 
 # FIXME: looks weird
 g5<-ggplot(data = share) +

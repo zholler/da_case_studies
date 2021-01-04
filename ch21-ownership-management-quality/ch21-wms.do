@@ -1,21 +1,49 @@
-********************************************************************************
+********************************************************************
+* Prepared for Gabor's Data Analysis
+*
+* Data Analysis for Business, Economics, and Policy
+* by Gabor Bekes and  Gabor Kezdi
+* Cambridge University Press 2021
+*
+* gabors-data-analysis.com 
+*
+* License: Free to share, modify and use for educational purposes. 
+* 	Not to be used for commercial purposes.
+*
 * Chapter 21
-*
-* founder/family ownsership
-* wms-management
-*
-**********************************************************************
+* CH21A Founder/family ownership and quality of management
+* using the wms-management-survey dataset
+* version 0.9 2020-09-13
+********************************************************************
 
 
-* set the path
-*cd "C:\Users\GB\Dropbox (MTA KRTK)\bekes_kezdi_textbook"
-cd "C:\Users\kezdi\Dropbox\bekes_kezdi_textbook"
+* SETTING UP DIRECTORIES
+
+* STEP 1: set working directory for da_case_studies.
+* for example:
+* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+cd "C:/Users/kezdi/GitHub/da_case_studies"
+
+* STEP 2: * Directory for data
+* Option 1: run directory-setting do file
+do set-data-directory.do 
+							/* this is a one-line do file that should sit in 
+							the working directory you have just set up
+							this do file has a global definition of your working directory
+							more details: gabors-data-analysis.com/howto-stata/   */
+
+* Option 2: set directory directly here
+* for example:
+* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
 
-*location folders
-global data_in   "da_data_repo/wms-management-survey/clean"
-global data_out  "da_case_studies/ch21-ownership-management-quality"
-global output   "$data_out/output"
+global data_in  "$data_dir/wms-management-survey/clean"
+global work  	"ch21-ownership-management-quality"
+
+cap mkdir 		"$work/output"
+global output 	"$work/output"
+
+
 
 
 ***************************************************************
@@ -81,6 +109,7 @@ gen lnemp=ln(emp)
 *lpoly management lnemp, nosca ci ylab(,grid) xlab(,grid)
 
 * competition 
+tab competition,mis
 rename competition competition_string
 encode competition_string, gen(competition)
  recode competition 1=2
@@ -116,6 +145,7 @@ drop if ownership=="" ///
 count
 tab foundfam
 
+drop if competition_string==""
  
 * keep observations with non-missing variables
 foreach v of varlist management foundfam  ///
@@ -131,7 +161,7 @@ count if emp>5000
 drop if emp>5000
 
 count
-* 8,440
+* 8,439
 
 
 *************************************************************
@@ -179,7 +209,7 @@ tab foundfam, sum(management)
 
 
 * save workfile for matching and regression
-save "$data_out/wms-workfile.dta",replace
+save "$work/wms-workfile.dta",replace
 
 
 ***************************************************************
@@ -191,7 +221,7 @@ save "$data_out/wms-workfile.dta",replace
 * REGRESSIONS
 *************************************************************
 
-use "$data_out/wms-workfile.dta" ,clear
+use "$work/wms-workfile.dta" ,clear
 
 sum industry country degree_nm degree_nm_sq compet_moder compet_strong ///
  age_young age_old age_unknown lnemp 
@@ -228,7 +258,7 @@ reg management foundfam ///
 * EXACT MATCHING
 ***************************************************************** 
 
-use "$data_out/wms-workfile.dta" ,clear
+use "$work/wms-workfile.dta" ,clear
 
 egen empbin5=cut(emp_firm), group(5)
  tabstat emp_firm, by(empbin) s(min max n)
@@ -288,7 +318,7 @@ sum d [w=n1]
 
 * SOLUTION With replacement
 
-use "$data_out/wms-workfile.dta" ,clear
+use "$work/wms-workfile.dta" ,clear
 
 psmatch2  foundfam ///
  i.industry i.countrycode ///
@@ -310,7 +340,7 @@ psmatch2  foundfam ///
 ***************************************************************** 
 * CHECK common support
 ***************************************************************** 
-use "$data_out/wms-workfile.dta" ,clear
+use "$work/wms-workfile.dta" ,clear
 
 
 qui tab industry, gen(i)
