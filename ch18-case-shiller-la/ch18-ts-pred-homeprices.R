@@ -13,7 +13,7 @@
 # CHAPTER 18
 # CH18B Forecasting a home price index
 # case-schiller-la dataset
-# version 0.9 2020-09-06
+# version 0.91 2020-01-08
 #########################################################################################
 
 
@@ -77,18 +77,19 @@ get_MSE_from_forecast <- function(forecast, groupby = c(".id", ".model")){
 #############################
 #load data
 
-data <- read_rds(paste0(data_in,"1houseprices-data-1990-2018.rds"))
-  #%>%
-  #as.data.frame() %>%
-  #mutate(date = yearmonth(date)) %>%
-  #as_tsibble(index = date)
+data <- read_rds(url('https://osf.io/v72tm/download'))
+#data <- read_csv(url("https://osf.io/aym2u/download"))
+#%>%
+#as.data.frame() %>%
+#mutate(date = yearmonth(date)) %>%
+#as_tsibble(index = date)
 
 data <- data %>%
   filter(date>="2000-01-01" & date<"2018-01-01")
- # 18 years data
- # 1 year holdout
- # 4 years of test
- # 13 years of train (rolling window)
+# 18 years data
+# 1 year holdout
+# 4 years of test
+# 13 years of train (rolling window)
 #data <- data %>% mutate(date = yearmonth(date))
 # pick if seasonal or non seasonal version used, will be cut later
 # here we pick pn, not seasonally adjusted
@@ -100,7 +101,7 @@ data <- data %>%
     p=pn,
     u=us,
     emp=emps
-      )
+  )
 
 data <- data %>%
   mutate(
@@ -176,7 +177,7 @@ emp_plot<-ggplot(data = data, aes(x = as.Date(date), y = emp))+
   geom_line_da() +
   ylab("Employment (in thousands)") +
   xlab("Date (month)") +
-#  scale_y_continuous(limits = c(10000,18000), breaks = seq(10000,18000,2000)) +
+  #  scale_y_continuous(limits = c(10000,18000), breaks = seq(10000,18000,2000)) +
   scale_x_date(expand = c(0.01, 0.01),   breaks = as.Date(c("2000-01-01", "2003-01-01", "2006-01-01",  "2009-01-01", "2012-01-01", "2015-01-01", "2018-01-01")),  labels = date_format("%b%Y")) +
   theme_bg()
 emp_plot
@@ -201,7 +202,7 @@ u_plot<-ggplot(data = data, aes(x = as.Date(date), y = u))+
   geom_line_da() +
   ylab("Unemployment rate (percent)") +
   xlab("Date (month)") +
-#  scale_y_continuous(limits = c(10000,18000), breaks = seq(10000,18000,2000)) +
+  #  scale_y_continuous(limits = c(10000,18000), breaks = seq(10000,18000,2000)) +
   scale_x_date(expand = c(0.01, 0.01),   breaks = as.Date(c("2000-01-01", "2003-01-01", "2006-01-01",  "2009-01-01", "2012-01-01", "2015-01-01", "2018-01-01")),  labels = date_format("%b%Y")) +
   theme_bg()
 u_plot
@@ -322,7 +323,7 @@ models_p <- data_tr %>%
         m2_p = m2_p,
         m3_p = m3_p,
         m4_p = m4_p
-        )
+  )
 
 rmse_train_p <- models_p %>%
   get_RMSE_from_model()
@@ -591,11 +592,11 @@ save_fig("ch18-figure-9b-pred-p-mp-fan", output, "small")
 ###########################
 
 
-data <- read_rds(paste0(data_in,"1houseprices-data-1990-2018.rds"))
-  #%>%
-  #as.data.frame() %>%
-  #mutate(date = yearmonth(date)) %>%
-  #as_tsibble(index = date)
+data <- read_rds(paste0(data_in,"houseprices-data-1990-2018-f.rds"))
+#%>%
+#as.data.frame() %>%
+#mutate(date = yearmonth(date)) %>%
+#as_tsibble(index = date)
 
 data <- data %>%
   filter(date>="2000-01-01" & date<"2019-01-01")

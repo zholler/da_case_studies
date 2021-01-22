@@ -64,7 +64,7 @@ source("ch00-tech-prep/theme_bg.R")
 source("ch00-tech-prep/da_helper_functions.R")
 options(digits = 3) 
 
-data_in <- paste(data_dir,"bisnode-firms","clean/", sep = "/")
+data_in <- paste(data_dir,"bisnode-firms","clean", sep = "/")
 use_case_dir <- "ch17-predicting-firm-exit/"
 
 data_out <- use_case_dir
@@ -82,7 +82,8 @@ create_output_if_doesnt_exist(output)
 
 # Use R format so it keeps factor definitions
 # data <- read_csv(paste0(data_out,"bisnode_firms_clean.csv"))
-data <- read_rds(paste(data_out,"bisnode_firms_clean.rds", sep = "/"))
+data <- read_rds(paste(data_in,"bisnode_firms_clean.rds", sep = "/"))
+
 
 #summary
 datasummary_skim(data, type='numeric', histogram = TRUE)
