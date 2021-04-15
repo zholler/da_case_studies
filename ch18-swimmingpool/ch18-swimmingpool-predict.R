@@ -25,6 +25,7 @@
 rm(list=ls())
 
 # Import libraries ---------------------------------------------------
+library(viridis)
 library(tidyverse)
 library(stargazer)
 library(Hmisc)
@@ -138,6 +139,7 @@ g1 <-ggplot(data=daily_agg[daily_agg$year==2015,], aes(x=date, y=QUANTITY)) +
   labs( x = "Date (day)", y="Daily ticket sales" ) +
   scale_color_discrete(name = "")
 g1
+
 save_fig("ch18-figure-3a-swimmingpool-2015", output, "small")
 
 g2<-ggplot(data=daily_agg[(daily_agg$year>=2010) & (daily_agg$year<=2014),], aes(x=date, y=QUANTITY)) +
@@ -187,7 +189,11 @@ swim_heatmap_log <-
   geom_tile(colour = "white") +
   labs(x = 'Day of week', y = 'Month ') +
   scale_fill_viridis(alpha = 0.7, begin = 1, end = 0.2, direction = 1, option = "D") +
-  theme_bg()  
+  theme_bg() +
+  theme(legend.position = "right",
+        legend.text = element_text(size=6),
+        legend.title =element_text(size=6)
+  )
 swim_heatmap_log
 
 #####################################
@@ -426,3 +432,4 @@ save_fig("ch18-figure-7a-swim-predictions-m", output, "small", plot=g_prediction
 #ch18-table-1-swim-rmse
 #ch18-table-2-cs-models-rmse
 #ch18-table-3-arima-folds
+
